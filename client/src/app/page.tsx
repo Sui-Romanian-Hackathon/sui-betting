@@ -1,4 +1,4 @@
-import BetList from '@/components/bet-list'
+import BetList from '@/components/bet-list/bet-list'
 import Menu from '@/components/menu/menu'
 
 export default function Home() {
