@@ -1,6 +1,11 @@
 'use client'
 
-import { ConnectButton, useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit'
+import {
+  ConnectButton,
+  useCurrentAccount,
+  useDisconnectWallet,
+  useSuiClientQuery,
+} from '@mysten/dapp-kit'
 import { MIST_PER_SUI } from '@mysten/sui/utils'
 
 function formatBalance(mist) {
@@ -12,8 +17,9 @@ function formatBalance(mist) {
   })
 }
 
-export default function Wallet() {
+export default function Wallet({ showBalance = true } = {}) {
   const account = useCurrentAccount()
+  const { mutateAsync: disconnect, isPending: isDisconnecting } = useDisconnectWallet()
 
   const {
     data: balance,
@@ -26,31 +32,38 @@ export default function Wallet() {
   const connected = !!account
 
   return (
-    <div className="flex flex-wrap items-center gap-3 mt-6">
-      {/* Wallet status card */}
-      <div className="flex items-center gap-3 rounded-xl bg-zinc-900/70 border border-zinc-800 px-4 py-2 shadow-sm">
-        <div className="flex flex-col">
-          <span className="text-xs uppercase tracking-wide text-zinc-400">Wallet</span>
+    <div className="flex flex-col items-end gap-2 text-right">
+      {showBalance && (
+        <div className="flex items-center gap-3 rounded-2xl border border-zinc-200/60 bg-white/80 px-4 py-2 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+          <div className="flex flex-col">
+            <span className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Wallet Balance
+            </span>
 
-          {connected ? (
-            <>
-              <span className="text-xs text-zinc-400">
-                {isPending && 'Fetching balance…'}
-                {isError && 'Balance unavailable'}
-                {!isPending && !isError && suiBalance !== null && (
-                  <>
-                    <span className="font-semibold text-zinc-100">{suiBalance} SUI</span>
-                  </>
-                )}
+            {connected ? (
+              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                {isPending && 'Fetching…'}
+                {isError && 'Unavailable'}
+                {!isPending && !isError && suiBalance !== null && `${suiBalance} SUI`}
               </span>
-            </>
-          ) : (
-            <span className="text-sm text-zinc-400">Not connected</span>
-          )}
+            ) : (
+              <span className="text-sm text-zinc-500 dark:text-zinc-400">Not connected</span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <ConnectButton />
+      {connected ? (
+        <button
+          onClick={() => disconnect()}
+          disabled={isDisconnecting}
+          className="w-full rounded-full border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        >
+          {isDisconnecting ? 'Disconnecting…' : 'Disconnect'}
+        </button>
+      ) : (
+        <ConnectButton />
+      )}
     </div>
   )
 }
