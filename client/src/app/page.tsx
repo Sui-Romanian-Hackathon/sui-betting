@@ -1,5 +1,6 @@
 import BetList from '@/components/bet-list/bet-list'
 import Menu from '@/components/menu/menu'
+import Wallet from '@/components/wallet'
 
 export default function Home() {
   return (
@@ -22,6 +23,8 @@ export default function Home() {
           </header>
 
           <BetList />
+
+          <Wallet />
         </div>
       </main>
     </div>
