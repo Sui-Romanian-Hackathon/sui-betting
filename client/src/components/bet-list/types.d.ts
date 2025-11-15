@@ -1,6 +1,4 @@
-type BetData = {
-  id: string
-}
+type BetData = BetObj
 
 type BetProps = {
   bet: BetData
@@ -8,4 +6,5 @@ type BetProps = {
 
 type BetObj = {
   description: string
+  id: { id: string }
 }
