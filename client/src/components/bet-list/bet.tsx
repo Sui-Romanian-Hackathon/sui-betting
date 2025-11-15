@@ -1,19 +1,95 @@
-export default async function Bet({ bet }: BetProps) {
+'use client'
+
+import { useState } from 'react'
+import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit'
+import { MIST_PER_SUI } from '@mysten/sui/utils'
+import PlaceBetPopup from './modals/place-bet'
+
+type BetComponentProps = BetProps & {
+  isActive?: boolean
+  isHidden?: boolean
+  onActivate?: (id: string) => void
+  onDeactivate?: () => void
+}
+
+export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate }: BetComponentProps) {
+  const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(null)
   const betObj: BetObj = bet
+
+  // Get wallet balance
+  const account = useCurrentAccount()
+  const { data: balance } = useSuiClientQuery(
+    'getBalance',
+    { owner: account?.address || '' },
+    { enabled: !!account }
+  )
+
+  // Convert MIST to SUI
+  const maxBalance = balance?.totalBalance 
+    ? Number(balance.totalBalance) / Number(MIST_PER_SUI)
+    : 100 // Fallback to 100 if wallet not connected
+
+  const handleOptionClick = (option: 'yes' | 'no') => {
+    if (selectedOption === option) {
+      setSelectedOption(null)
+      onDeactivate?.()
+    } else {
+      setSelectedOption(option)
+      onActivate?.(bet.id.id)
+    }
+  }
+
+  const handleClose = () => {
+    setSelectedOption(null)
+    onDeactivate?.()
+  }
+
+  if (isHidden) {
+    return null
+  }
+
   return (
-    <div className="flex w-full items-center gap-4 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="min-w-0 flex-1">
-        <h2 className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-          {betObj.description ?? 'Loading...'}
-        </h2>
-        <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{bet.id.id}</p>
+    <div className="relative w-full">
+      <div className="flex w-full items-center gap-4 rounded-2xl border border-zinc-200 bg-white px-7 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+            {betObj.description ?? 'Loading...'}
+          </h2>
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{bet.id.id}</p>
+        </div>
+
+        <div className="flex shrink-0 gap-2">
+          <button
+            onClick={() => handleOptionClick('yes')}
+            className={`rounded-lg border px-4 py-1.5 text-xs font-semibold transition-all ${
+              selectedOption === 'yes'
+                ? 'border-emerald-500 bg-emerald-500 text-white shadow-md'
+                : 'border-emerald-500/50 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20'
+            }`}
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => handleOptionClick('no')}
+            className={`rounded-lg border px-4 py-1.5 text-xs font-semibold transition-all ${
+              selectedOption === 'no'
+                ? 'border-red-500 bg-red-500 text-white shadow-md'
+                : 'border-red-500/50 bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20'
+            }`}
+          >
+            No
+          </button>
+        </div>
       </div>
 
-      <div className="flex shrink-0 gap-2">
-        <button className="rounded-full border border-emerald-500 px-3 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-900/30">
-          Place Bet
-        </button>
-      </div>
+      {selectedOption && (
+        <PlaceBetPopup 
+          bet={betObj} 
+          option={selectedOption}
+          maxBalance={maxBalance}
+          onClose={handleClose} 
+        />
+      )}
     </div>
   )
 }
