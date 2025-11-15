@@ -1,22 +1,15 @@
-type BetData = {
-  address: string
-  id: string
-  title: string
-}
+import { getBetObj } from './helpers/get-bet-obj'
 
-type BetProps = {
-  bet: BetData
-}
-
-export default function Bet({ bet }: BetProps) {
+export default async function Bet({ bet }: BetProps) {
+  const betObj: BetObj = (await getBetObj(bet.id)) as BetObj
   return (
     <div className="flex w-full items-center gap-4 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <div className="min-w-0 flex-1">
         <h2 className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-          {bet.title}
+          {betObj.description ?? 'Loading...'}
         </h2>
         <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-          {bet.address ?? 'missing-address'}
+          {bet.id ?? 'missing-address'}
         </p>
       </div>
 
