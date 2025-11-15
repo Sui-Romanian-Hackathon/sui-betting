@@ -1,6 +1,6 @@
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client'
 
-export async function getBetObj(betID: string) {
+export async function getMoveObj(betID: string) {
   const suiClient = new SuiClient({ url: getFullnodeUrl('testnet') })
 
   const betObj = await suiClient.getObject({

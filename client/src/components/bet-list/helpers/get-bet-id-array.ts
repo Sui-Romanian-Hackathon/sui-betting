@@ -1,3 +1,12 @@
-export function getBetIdArray() {
-  return ['0xe9f788f31dddc1218ae9a46fe407229bb47e444235e3aea7ede79139518f81c7']
+import { getMoveObj } from './get-move-obj'
+
+export async function getBetIdArray() {
+  const betRegistryPromise = getMoveObj(
+    '0x133243163b6ee4d234b35e448187a5a7d5e0c70079ffa129bb4aadd220ea5390',
+  )
+
+  const betRegistry = await betRegistryPromise
+
+  if (betRegistry === undefined) return []
+  return (betRegistry as BetRegistry).events
 }
