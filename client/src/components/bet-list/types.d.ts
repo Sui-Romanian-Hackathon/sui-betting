@@ -1,3 +1,5 @@
+//client/src/components/bet-list/types.d.ts
+
 type BetData = BetObj
 
 type BetProps = {

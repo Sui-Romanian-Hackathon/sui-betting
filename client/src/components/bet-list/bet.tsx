@@ -1,6 +1,9 @@
+//client/src/components/bet-list/bet.tsx
+
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit'
 import { MIST_PER_SUI } from '@mysten/sui/utils'
 import PlaceBetPopup from './modals/place-bet'
@@ -16,7 +19,7 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
   const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(null)
   const betObj: BetObj = bet
 
-  // Get wallet balance
+  // Wallet balance
   const account = useCurrentAccount()
   const { data: balance } = useSuiClientQuery(
     'getBalance',
@@ -24,10 +27,9 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
     { enabled: !!account }
   )
 
-  // Convert MIST to SUI
-  const maxBalance = balance?.totalBalance 
+  const maxBalance = balance?.totalBalance
     ? Number(balance.totalBalance) / Number(MIST_PER_SUI)
-    : 100 // Fallback to 100 if wallet not connected
+    : 100
 
   const handleOptionClick = (option: 'yes' | 'no') => {
     if (selectedOption === option) {
@@ -44,20 +46,26 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
     onDeactivate?.()
   }
 
-  if (isHidden) {
-    return null
-  }
+  if (isHidden) return null
 
   return (
     <div className="relative w-full">
-      <div className="flex w-full items-center gap-4 rounded-2xl border border-zinc-200 bg-white px-7 py-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="min-w-0 flex-1">
-          <h2 className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-            {betObj.description ?? 'Loading...'}
-          </h2>
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{bet.id.id}</p>
-        </div>
+      <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-white px-7 py-6 
+                      shadow-sm dark:border-zinc-800 dark:bg-zinc-900 hover:bg-zinc-100/30 dark:hover:bg-zinc-800/40 transition">
 
+        {/* LEFT SIDE = Clickable section */}
+        <Link href={`/event/${bet.id.id}`} className="flex-1 block">
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+              {betObj.description ?? 'Loading...'}
+            </h2>
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              {bet.id.id}
+            </p>
+          </div>
+        </Link>
+
+        {/* RIGHT SIDE = Buttons */}
         <div className="flex shrink-0 gap-2">
           <button
             onClick={() => handleOptionClick('yes')}
@@ -69,6 +77,7 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
           >
             Yes
           </button>
+
           <button
             onClick={() => handleOptionClick('no')}
             className={`rounded-lg border px-4 py-1.5 text-xs font-semibold transition-all ${
@@ -80,14 +89,16 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
             No
           </button>
         </div>
+
       </div>
 
+      {/* Popup */}
       {selectedOption && (
-        <PlaceBetPopup 
-          bet={betObj} 
+        <PlaceBetPopup
+          bet={betObj}
           option={selectedOption}
           maxBalance={maxBalance}
-          onClose={handleClose} 
+          onClose={handleClose}
         />
       )}
     </div>

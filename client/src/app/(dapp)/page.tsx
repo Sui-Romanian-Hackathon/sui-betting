@@ -1,7 +1,11 @@
-import BetList from '@/components/bet-list/bet-list'
-import Menu from '@/components/menu/menu'
-import Wallet from '@/components/wallet'
-import WalletGate from '@/components/wallet-gate'
+//client/src/app/(dapp)/page.tsx
+
+'use client';
+
+import WalletGate from "@/components/wallet-gate";
+import Wallet from "@/components/wallet";
+import Menu from "@/components/menu/menu";
+import BetList from "@/components/bet-list/bet-list";
 
 export default function Home() {
   return (
@@ -11,24 +15,18 @@ export default function Home() {
           <WalletGate>
             <header className="flex flex-col gap-4 border-b border-zinc-200 px-6 py-6 dark:border-zinc-800 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-                  SUI Betting
-                </h1>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  The on-chain casino built on Sui Blockchain.
-                </p>
+                <h1 className="text-2xl font-semibold">SUI Betting</h1>
+                <p className="text-sm text-zinc-500">The on-chain casino built on Sui Blockchain.</p>
               </div>
-
               <div className="flex flex-col items-stretch gap-4 lg:min-w-[320px] lg:items-end">
                 <Wallet />
                 <Menu />
               </div>
             </header>
-
             <BetList />
           </WalletGate>
         </div>
       </main>
     </div>
-  )
+  );
 }

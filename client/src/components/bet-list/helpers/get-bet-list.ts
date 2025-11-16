@@ -1,12 +1,12 @@
-import { getBetIdArray } from './get-bet-id-array'
-import { getMoveObj } from './get-move-obj'
+//client/src/components/bet-list/helpers/get-bet-list.ts
+
+import { getMoveObj } from "./get-move-obj";
+import { getBetIdArray } from "./get-bet-id-array";
 
 export async function getBetList() {
-  const bets = await getBetIdArray()
+  const ids = await getBetIdArray();
 
-  const betList = await Promise.all(bets.map((bet) => getMoveObj(bet)))
+  const events = await Promise.all(ids.map((id) => getMoveObj(id)));
 
-  betList.filter((bet) => bet !== undefined)
-
-  return betList as BetObj[]
+  return events.filter(Boolean);
 }

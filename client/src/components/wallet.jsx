@@ -1,69 +1,25 @@
-'use client'
+//client/src/components/wallet.jsx
 
-import {
-  ConnectButton,
-  useCurrentAccount,
-  useDisconnectWallet,
-  useSuiClientQuery,
-} from '@mysten/dapp-kit'
-import { MIST_PER_SUI } from '@mysten/sui/utils'
+'use client';
 
-function formatBalance(mist) {
-  if (!mist) return '0'
-  const sui = Number(mist) / Number(MIST_PER_SUI)
-  // show up to 4 decimals, trim trailing zeros
-  return sui.toLocaleString(undefined, {
-    maximumFractionDigits: 4,
-  })
-}
+import { useCurrentAccount, ConnectButton, useDisconnectWallet } from '@mysten/dapp-kit';
 
-export default function Wallet({ showBalance = true } = {}) {
-  const account = useCurrentAccount()
-  const { mutateAsync: disconnect, isPending: isDisconnecting } = useDisconnectWallet()
-
-  const {
-    data: balance,
-    isPending,
-    isError,
-  } = useSuiClientQuery('getBalance', { owner: account?.address }, { enabled: !!account })
-
-  const suiBalance = balance?.totalBalance ? formatBalance(balance.totalBalance) : null
-
-  const connected = !!account
+export default function Wallet() {
+  const account = useCurrentAccount();
+  const disconnect = useDisconnectWallet();
 
   return (
-    <div className="flex flex-col items-end gap-2 text-right">
-      {showBalance && (
-        <div className="flex items-center gap-3 rounded-2xl border border-zinc-200/60 bg-white/80 px-4 py-2 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
-          <div className="flex flex-col">
-            <span className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              Wallet Balance
-            </span>
-
-            {connected ? (
-              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                {isPending && 'Fetching…'}
-                {isError && 'Unavailable'}
-                {!isPending && !isError && suiBalance !== null && `${suiBalance} SUI`}
-              </span>
-            ) : (
-              <span className="text-sm text-zinc-500 dark:text-zinc-400">Not connected</span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {connected ? (
+    <div>
+      {account ? (
         <button
           onClick={() => disconnect()}
-          disabled={isDisconnecting}
-          className="w-full rounded-full border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className="rounded-xl bg-red-600 px-4 py-2 text-white"
         >
-          {isDisconnecting ? 'Disconnecting…' : 'Disconnect'}
+          Disconnect
         </button>
       ) : (
-        <ConnectButton />
+        <ConnectButton style={{ background: "red", color: "white" }} />
       )}
     </div>
-  )
+  );
 }

@@ -1,3 +1,5 @@
+//client/src/components/bet-list/modals/place-bet.tsx
+
 'use client'
 
 import { useState, useEffect } from 'react'

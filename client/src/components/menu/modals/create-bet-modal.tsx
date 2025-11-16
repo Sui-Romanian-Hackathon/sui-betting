@@ -1,3 +1,5 @@
+//client/src/components/menu/modals/create-bet-modal.tsx
+
 import Modal from './modal'
 
 type Props = {

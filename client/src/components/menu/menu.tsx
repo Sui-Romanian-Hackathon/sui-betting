@@ -1,3 +1,5 @@
+//client/src/components/menu/menu.tsx
+
 'use client'
 
 import { useState } from 'react'

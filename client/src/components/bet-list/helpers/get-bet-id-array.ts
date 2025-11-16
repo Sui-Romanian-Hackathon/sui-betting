@@ -1,12 +1,16 @@
-import { getMoveObj } from './get-move-obj'
+//client/src/components/bet-list/helpers/get-bet-id-array.ts
 
-export async function getBetIdArray() {
-  const betRegistryPromise = getMoveObj(
-    '0x133243163b6ee4d234b35e448187a5a7d5e0c70079ffa129bb4aadd220ea5390',
-  )
+import { getMoveObj } from "./get-move-obj";
 
-  const betRegistry = await betRegistryPromise
+const REGISTRY_ID =
+  "0x425464a95187b8063ea1768457c6dcd93a49d640f6331e6ab52fbd7147a50fb3";
 
-  if (betRegistry === undefined) return []
-  return (betRegistry as BetRegistry).events
+export async function getBetIdArray(): Promise<string[]> {
+  const registry = await getMoveObj(REGISTRY_ID);
+
+  if (!registry || !registry.events) {
+    return [];
+  }
+
+  return registry.events as string[];
 }
