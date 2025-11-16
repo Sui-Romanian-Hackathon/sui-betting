@@ -18,6 +18,7 @@ type BetComponentProps = BetProps & {
 export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate }: BetComponentProps) {
   const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(null)
   const betObj: BetObj = bet
+  const isClosed = Boolean(betObj.is_closed)
 
   // Wallet balance
   const account = useCurrentAccount()
@@ -32,6 +33,8 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
     : 100
 
   const handleOptionClick = (option: 'yes' | 'no') => {
+    if (isClosed) return
+
     if (selectedOption === option) {
       setSelectedOption(null)
       onDeactivate?.()
@@ -66,34 +69,40 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
         </Link>
 
         {/* RIGHT SIDE = Buttons */}
-        <div className="flex shrink-0 gap-2">
-          <button
-            onClick={() => handleOptionClick('yes')}
-            className={`rounded-lg border px-4 py-1.5 text-xs font-semibold transition-all ${
-              selectedOption === 'yes'
-                ? 'border-emerald-500 bg-emerald-500 text-white shadow-md'
-                : 'border-emerald-500/50 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20'
-            }`}
-          >
-            Yes
-          </button>
+        {isClosed ? (
+          <span className="rounded-lg border border-zinc-200 bg-zinc-100 px-4 py-1.5 text-xs font-medium text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+            Betting closed
+          </span>
+        ) : (
+          <div className="flex shrink-0 gap-2">
+            <button
+              onClick={() => handleOptionClick('yes')}
+              className={`rounded-lg border px-4 py-1.5 text-xs font-semibold transition-all ${
+                selectedOption === 'yes'
+                  ? 'border-emerald-500 bg-emerald-500 text-white shadow-md'
+                  : 'border-emerald-500/50 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20'
+              }`}
+            >
+              Yes
+            </button>
 
-          <button
-            onClick={() => handleOptionClick('no')}
-            className={`rounded-lg border px-4 py-1.5 text-xs font-semibold transition-all ${
-              selectedOption === 'no'
-                ? 'border-red-500 bg-red-500 text-white shadow-md'
-                : 'border-red-500/50 bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20'
-            }`}
-          >
-            No
-          </button>
-        </div>
+            <button
+              onClick={() => handleOptionClick('no')}
+              className={`rounded-lg border px-4 py-1.5 text-xs font-semibold transition-all ${
+                selectedOption === 'no'
+                  ? 'border-red-500 bg-red-500 text-white shadow-md'
+                  : 'border-red-500/50 bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20'
+              }`}
+            >
+              No
+            </button>
+          </div>
+        )}
 
       </div>
 
       {/* Popup */}
-      {selectedOption && (
+      {selectedOption && !isClosed && (
         <PlaceBetPopup
           bet={betObj}
           option={selectedOption}

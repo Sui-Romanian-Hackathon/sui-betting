@@ -9,6 +9,7 @@ type BetProps = {
 type BetObj = {
   description: string
   id: { id: string }
+  is_closed?: boolean
 }
 type BetRegistry = {
   events: string[]
