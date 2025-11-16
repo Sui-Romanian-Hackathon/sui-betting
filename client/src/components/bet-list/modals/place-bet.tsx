@@ -92,31 +92,31 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
     <>
       {/* Overlay */}
       <div 
-        className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm overflow-hidden"
+        className="fixed inset-0 z-40 bg-black/70 backdrop-blur-md overflow-hidden"
         onClick={onClose}
       />
 
       {/* Popup */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-4 shadow-lg dark:border-zinc-700 dark:bg-zinc-800">
+        <div className="pointer-events-auto w-full max-w-md rounded-[28px] border border-white/10 bg-gradient-to-b from-[#1c0036] via-[#0b0116] to-[#06000d] p-6 text-white shadow-[0_25px_120px_rgba(8,0,15,0.8)]">
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col gap-1">
-              <h3 className="text-xs font-medium text-zinc-500 dark:text-zinc-400 truncate max-w-[250px]">
+              <h3 className="text-xs font-medium text-purple-200/80 truncate max-w-[260px] uppercase tracking-[0.4em]">
                 {bet.description}
               </h3>
               <span className={`text-sm font-semibold ${
                 option === 'yes'
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-red-600 dark:text-red-400'
+                  ? 'text-emerald-300'
+                  : 'text-red-300'
               }`}>
                 Betting on: {option.toUpperCase()}
               </span>
             </div>
             <button
               onClick={onClose}
-              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+              className="text-purple-200/70 hover:text-white"
             >
               ✕
             </button>
@@ -138,7 +138,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
 
           {/* Amount */}
           <div className="mb-4">
-            <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-300 mb-2">
+            <label className="block text-xs font-medium text-purple-200/80 mb-2 tracking-[0.3em] uppercase">
               Amount (SUI)
             </label>
             <input
@@ -148,7 +148,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
               step="0.1"
               value={amount}
               onChange={handleAmountChange}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-emerald-400 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50"
+              className="w-full rounded-2xl border border-white/20 bg-black/40 px-3 py-3 text-sm text-white outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-400/40"
             />
           </div>
 
@@ -161,9 +161,9 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
               step="0.001"
               value={amount}
               onChange={handleSliderChange}
-              className="w-full h-2 rounded-lg cursor-pointer bg-zinc-200 dark:bg-zinc-700"
+              className="w-full h-2 rounded-full cursor-pointer bg-purple-900/40 accent-fuchsia-400"
             />
-            <div className="flex justify-between mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="flex justify-between mt-1 text-xs text-purple-200/80">
               <span>0 SUI</span>
               <span>{maxBalance.toFixed(2)} SUI</span>
             </div>
@@ -175,7 +175,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
               <button
                 key={p}
                 onClick={() => handleQuickAmount(maxBalance * p)}
-                className="rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-xs font-medium text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+                className="rounded-2xl border border-white/15 bg-white/10 px-2 py-1.5 text-xs font-medium text-white transition hover:border-white/40"
               >
                 {p === 1 ? 'Max' : `${p * 100}%`}
               </button>
@@ -186,7 +186,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
           <button
             onClick={handlePlaceBet}
             disabled={amount > maxBalance || status === "loading"}
-            className={`w-full rounded-xl px-7 py-4 text-center font-bold text-white shadow-lg transition-all ${
+            className={`w-full rounded-3xl px-7 py-4 text-center font-bold text-white shadow-[0_20px_60px_rgba(114,57,181,0.7)] transition-all ${
               option === 'yes'
                 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
                 : 'bg-gradient-to-r from-red-500 to-red-600'

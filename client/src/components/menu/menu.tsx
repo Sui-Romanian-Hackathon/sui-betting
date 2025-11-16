@@ -14,30 +14,24 @@ export default function Menu() {
 
   const close = () => setOpen(null)
 
+  const buttons: { label: string; action: OpenModal; gradient: string }[] = [
+    { label: '+ Create Bet', action: 'create', gradient: 'from-fuchsia-500 via-purple-500 to-indigo-500' },
+    { label: 'Sort', action: 'sort', gradient: 'from-purple-500 to-purple-700' },
+    { label: 'Filter', action: 'filter', gradient: 'from-indigo-500 to-blue-600' },
+  ]
+
   return (
     <>
-      {/* Button group */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setOpen('create')}
-          className="rounded-full border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
-        >
-          + Create Bet
-        </button>
-
-        <button
-          onClick={() => setOpen('sort')}
-          className="rounded-full border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
-        >
-          Sort
-        </button>
-
-        <button
-          onClick={() => setOpen('filter')}
-          className="rounded-full border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
-        >
-          Filter
-        </button>
+      <div className="flex flex-wrap items-center gap-3">
+        {buttons.map((btn) => (
+          <button
+            key={btn.label}
+            onClick={() => setOpen(btn.action)}
+            className={`rounded-full border border-white/20 bg-gradient-to-r ${btn.gradient} px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-lg shadow-purple-900/40 transition hover:scale-[1.03]`}
+          >
+            {btn.label}
+          </button>
+        ))}
       </div>
 
       {open === 'create' && <CreateBetModal onClose={close} />}

@@ -14,24 +14,22 @@ export default function BetList() {
 
   if (isLoading) {
     return (
-      <section className="max-h-[480px] space-y-3 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
-        <p className="text-sm text-zinc-500">Loading events from chain...</p>
+      <section className="max-h-[520px] space-y-3 overflow-y-auto rounded-[28px] border border-white/10 bg-black/30 px-4 py-8 text-center text-sm text-purple-100/70 shadow-inner shadow-purple-950/60 sm:px-6">
+        <p className="animate-pulse">Shuffling fresh events from the chain...</p>
       </section>
     )
   }
 
   if (error || !bets) {
     return (
-      <section className="max-h-[480px] space-y-3 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
-        <p className="text-sm text-red-400">
-          Failed to load events from chain.
-        </p>
+      <section className="max-h-[520px] space-y-3 overflow-y-auto rounded-[28px] border border-white/10 bg-black/30 px-4 py-8 text-center text-sm text-red-200 shadow-inner shadow-purple-950/60 sm:px-6">
+        <p>Failed to load events from chain.</p>
       </section>
     )
   }
 
   return (
-    <section className="max-h-[480px] space-y-3 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
+    <section className="casino-scroll max-h-[520px] space-y-4 overflow-y-auto rounded-[28px] border border-white/10 bg-black/30 px-4 py-6 shadow-inner shadow-purple-950/60 sm:px-6">
       {bets.map((bet) => (
         <Bet key={bet.id.id} bet={bet} />
       ))}
