@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Bet from './bet-card'
 import { getBetList } from '../api/get-bet-list'
@@ -24,14 +24,24 @@ export default function BetList({ onStats }: BetListProps) {
   })
 
   const betArray = ((bets ?? []) as BetObj[]).slice().reverse()
-  const previousIdsRef = useRef<Set<string>>(new Set())
+  const knownIdsRef = useRef<Set<string>>(new Set())
+  const initializedRef = useRef(false)
+  const [highlightIds, setHighlightIds] = useState<Set<string>>(new Set())
+
+  const areSetsEqual = (a: Set<string>, b: Set<string>) => {
+    if (a.size !== b.size) return false
+    for (const value of a) {
+      if (!b.has(value)) return false
+    }
+    return true
+  }
 
   useEffect(() => {
     if (!bets) {
       return
     }
 
-    const list = bets as BetObj[]
+    const list = betArray
     const totals = {
       total: list.length,
       open: list.filter((bet) => !bet.is_closed).length,
@@ -39,18 +49,22 @@ export default function BetList({ onStats }: BetListProps) {
     onStats?.(totals)
 
     const currentIds = new Set<string>()
+    const nextHighlights = new Set(highlightIds)
     list.forEach((bet) => {
       const id = bet.id.id
       currentIds.add(id)
-      if (!previousIdsRef.current.has(id)) {
-        ;(bet as BetObj & { __isNew?: boolean }).__isNew = true
-        setTimeout(() => {
-          ;(bet as BetObj & { __isNew?: boolean }).__isNew = false
-        }, 6000)
+      if (!knownIdsRef.current.has(id) && initializedRef.current) {
+        nextHighlights.add(id)
       }
     })
-    previousIdsRef.current = currentIds
-  }, [bets, onStats])
+    if (!initializedRef.current) {
+      initializedRef.current = true
+    }
+    knownIdsRef.current = new Set([...knownIdsRef.current, ...currentIds])
+    if (!areSetsEqual(nextHighlights, highlightIds)) {
+      setHighlightIds(nextHighlights)
+    }
+  }, [betArray, highlightIds, onStats])
 
   if (isLoading) {
     return (
@@ -68,10 +82,26 @@ export default function BetList({ onStats }: BetListProps) {
     )
   }
 
+  const handleAcknowledge = (id: string) => {
+    if (!highlightIds.has(id)) {
+      knownIdsRef.current.add(id)
+      return
+    }
+    const updated = new Set(highlightIds)
+    updated.delete(id)
+    setHighlightIds(updated)
+    knownIdsRef.current.add(id)
+  }
+
   return (
     <section className="casino-scroll max-h-[520px] space-y-4 overflow-y-auto rounded-[28px] border border-white/10 bg-black/30 px-4 py-6 shadow-inner shadow-purple-950/60 sm:px-6">
       {betArray.map((bet) => (
-        <Bet key={bet.id.id} bet={bet} />
+        <Bet
+          key={bet.id.id}
+          bet={bet}
+          isNew={highlightIds.has(bet.id.id)}
+          onAcknowledgeNew={handleAcknowledge}
+        />
       ))}
     </section>
   )

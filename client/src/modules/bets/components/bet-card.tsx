@@ -14,6 +14,8 @@ type BetComponentProps = BetProps & {
   isHidden?: boolean
   onActivate?: (id: string) => void
   onDeactivate?: () => void
+  onAcknowledgeNew?: (id: string) => void
+  isNew?: boolean
 }
 
 export default function Bet({
@@ -22,6 +24,8 @@ export default function Bet({
   isHidden,
   onActivate,
   onDeactivate,
+  onAcknowledgeNew,
+  isNew,
 }: BetComponentProps) {
   const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(null)
   const betObj: BetObj = bet
@@ -54,6 +58,12 @@ export default function Bet({
     ? Number(balance.totalBalance) / Number(MIST_PER_SUI)
     : 100
 
+  const clearNewBadge = () => {
+    if (isNew) {
+      onAcknowledgeNew?.(bet.id.id)
+    }
+  }
+
   const handleOptionClick = (option: 'yes' | 'no') => {
     if (isClosed) return
 
@@ -64,6 +74,8 @@ export default function Bet({
       setSelectedOption(option)
       onActivate?.(bet.id.id)
     }
+
+    clearNewBadge()
   }
 
   const handleClose = () => {
@@ -77,11 +89,17 @@ export default function Bet({
     <div className="relative w-full">
       <div
         className={`group flex w-full items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-gradient-to-r from-[rgba(43,9,61,0.85)] via-[rgba(27,5,46,0.85)] to-[rgba(16,2,30,0.85)] px-7 py-6 text-white shadow-[0_20px_60px_rgba(8,0,15,0.75)] transition duration-300 hover:-translate-y-1 hover:border-purple-300/40 ${
-          betObj.__isNew ? 'ring-2 ring-emerald-400/60 shadow-[0_0_35px_rgba(16,185,129,0.5)] animate-[pulse_2s_ease-in-out_infinite]' : ''
+          isNew
+            ? 'ring-4 ring-yellow-400/80 shadow-[0_0_45px_rgba(250,204,21,0.8)] animate-[pulse_1.6s_ease-in-out_infinite]'
+            : ''
         }`}
       >
         {/* LEFT SIDE = Clickable section */}
-        <Link href={`/event/${bet.id.id}`} className="block flex-1">
+        <Link
+          href={`/event/${bet.id.id}`}
+          className="block flex-1"
+          onClick={clearNewBadge}
+        >
           <div className="min-w-0">
             <h2 className="truncate text-lg font-semibold text-white drop-shadow">
               {betObj.description ?? 'Loading...'}
