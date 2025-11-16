@@ -8,6 +8,7 @@ import { Transaction } from '@mysten/sui/transactions'
 import { MIST_PER_SUI } from '@mysten/sui/utils'
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit'
 import { useCurrency } from '@/modules/shared/currency'
+import JackpotSpinModal from '@/modules/to-integrate/jackpot-spin-modal'
 
 type PlaceBetPopupProps = {
   bet: BetObj
@@ -22,7 +23,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
   const [amountSui, setAmountSui] = useState(10)
   const dialogRef = useRef<HTMLDivElement>(null)
   const { unit, format, formatWithUnit, convertToUnit, convertFromUnit } = useCurrency()
-
+  const [showJackpot, setShowJackpot] = useState(false)
   // NEW STATES:
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -62,11 +63,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
       console.log('✅ TX SUCCESS:', result)
 
       setStatus('success')
-
-      // Close popup after 1 second
-      setTimeout(() => {
-        onClose()
-      }, 1000)
+      setShowJackpot(true)
     } catch (err: any) {
       console.error('❌ TX FAILED:', err)
       setStatus('error')
@@ -91,8 +88,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
 
   const handleQuickAmount = (v: number) => setAmountSui(v)
 
-  const parsePoolTotal = (value?: number | string) =>
-    Number(value ?? 0) / Number(MIST_PER_SUI)
+  const parsePoolTotal = (value?: number | string) => Number(value ?? 0) / Number(MIST_PER_SUI)
 
   const longPoolTotal = parsePoolTotal(bet.long_pool?.fields?.total)
   const shortPoolTotal = parsePoolTotal(bet.short_pool?.fields?.total)
@@ -119,6 +115,21 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [onClose])
 
+  const handleJackpotClose = () => {
+    setShowJackpot(false)
+    onClose()
+  }
+
+  if (showJackpot) {
+    return (
+      <JackpotSpinModal
+        betAmount={amountSui}
+        potentialPayout={potentialPayout}
+        onClose={handleJackpotClose}
+      />
+    )
+  }
+
   return (
     <>
       {/* Overlay */}
@@ -131,111 +142,138 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
           ref={dialogRef}
-          className="pointer-events-auto w-full max-w-md rounded-[28px] border border-white/10 bg-gradient-to-b from-[#1c0036] via-[#0b0116] to-[#06000d] p-6 text-white shadow-[0_25px_120px_rgba(8,0,15,0.8)]"
+          className="pointer-events-auto w-full max-w-2xl rounded-[32px] border border-white/15 bg-gradient-to-br from-[#1a0035] via-[#05000f] to-[#0a0116] p-1 text-white shadow-[0_40px_160px_rgba(8,0,20,0.85)]"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex flex-col gap-1">
-              <h3 className="text-xs font-medium text-purple-200/80 truncate max-w-[260px] uppercase tracking-[0.4em]">
-                {bet.description}
-              </h3>
-              <span
-                className={`text-sm font-semibold ${
-                  option === 'yes' ? 'text-emerald-300' : 'text-red-300'
-                }`}
+          <div className="rounded-[30px] border border-white/10 bg-black/60 p-7">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.45em] text-purple-200/70">
+                  Purple Palace Bet Slip
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-white">{bet.description}</h3>
+                <p
+                  className={`mt-1 text-sm font-semibold ${
+                    option === 'yes' ? 'text-emerald-300' : 'text-red-300'
+                  }`}
+                >
+                  Betting on {option.toUpperCase()}
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="rounded-full border border-white/20 px-4 py-1 text-sm text-white/70 transition hover:border-white hover:text-white"
               >
-                Betting on: {option.toUpperCase()}
-              </span>
+                ✕ Close
+              </button>
             </div>
-            <button onClick={onClose} className="text-purple-200/70 hover:text-white">
-              ✕
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-xs text-purple-100/80">
+                <p className="uppercase tracking-[0.3em] text-purple-200/70">Pool Total</p>
+                <p className="mt-2 text-xl font-semibold text-white">{format(totalPool)}</p>
+              </div>
+              <div className="rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-4 text-xs text-emerald-100/80">
+                <p className="uppercase tracking-[0.3em] text-emerald-200/70">Yes Pool</p>
+                <p className="mt-2 text-xl font-semibold text-emerald-200">
+                  {format(longPoolTotal)}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-red-400/40 bg-red-500/10 p-4 text-xs text-red-100/80">
+                <p className="uppercase tracking-[0.3em] text-red-200/70">No Pool</p>
+                <p className="mt-2 text-xl font-semibold text-red-200">{format(shortPoolTotal)}</p>
+              </div>
+            </div>
+
+            {status === 'success' && (
+              <div className="mt-4 rounded-2xl border border-emerald-400/40 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100 shadow-[0_0_25px_rgba(16,185,129,0.4)]">
+                ✅ Bet placed successfully! Payout pending settlement.
+              </div>
+            )}
+            {status === 'error' && (
+              <div className="mt-4 rounded-2xl border border-red-500/40 bg-red-400/10 px-4 py-3 text-sm text-red-100 shadow-[0_0_25px_rgba(248,113,113,0.4)]">
+                ❌ {errorMessage}
+              </div>
+            )}
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+              <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.35em] text-purple-200/70 mb-2">
+                  Amount ({unit})
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max={maxDisplayAmount}
+                  step="0.1"
+                  value={Number.isFinite(displayAmount) ? displayAmount : 0}
+                  onChange={handleAmountChange}
+                  className="w-full rounded-2xl border border-white/20 bg-black/60 px-3 py-3 text-sm text-white outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-600/40"
+                />
+                <p className="mt-2 text-xs text-purple-200/70">
+                  ≈ {formatWithUnit(amountSui, oppositeUnit)}
+                </p>
+                <input
+                  type="range"
+                  min="0"
+                  max={maxDisplayAmount}
+                  step="0.001"
+                  value={Number.isFinite(displayAmount) ? displayAmount : 0}
+                  onChange={handleSliderChange}
+                  className="mt-4 w-full h-2 rounded-full cursor-pointer bg-purple-900/40 accent-fuchsia-400"
+                />
+                <div className="flex justify-between mt-1 text-xs text-purple-200/80">
+                  <span>{formatWithUnit(0, unit)}</span>
+                  <span>{formatWithUnit(maxBalance, unit)}</span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                  <p className="text-[11px] uppercase tracking-[0.35em] text-purple-200/70 mb-3">
+                    Quick Stakes
+                  </p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[0.1, 0.25, 0.5, 1].map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => handleQuickAmount(maxBalance * p)}
+                        className="rounded-xl border border-white/20 bg-white/10 px-2 py-1.5 text-xs font-medium text-white transition hover:border-white/40"
+                      >
+                        {p === 1 ? 'Max' : `${Math.round(p * 100)}%`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-[24px] border border-white/10 bg-gradient-to-r from-[#2a0b43]/70 to-[#12041f]/85 p-4 text-xs text-white/80">
+                  <p className="uppercase tracking-[0.35em] text-purple-200/60">Potential Win</p>
+                  <p className="mt-2 text-3xl font-bold text-white">{format(potentialPayout)}</p>
+                  <p className="mt-1 text-purple-200/70">
+                    Based on current liquidity and your share of the {option.toUpperCase()} pool.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handlePlaceBet}
+              disabled={amountSui > maxBalance || status === 'loading'}
+              className={`mt-8 w-full rounded-3xl px-7 py-4 text-center font-bold text-white shadow-[0_25px_70px_rgba(148,64,255,0.5)] transition-all ${
+                option === 'yes'
+                  ? 'bg-gradient-to-r from-emerald-400 via-emerald-500 to-lime-400'
+                  : 'bg-gradient-to-r from-red-400 via-pink-500 to-orange-400'
+              }`}
+            >
+              {status === 'loading' ? (
+                'Processing...'
+              ) : (
+                <>
+                  <div className="text-xs uppercase tracking-[0.6em] opacity-90">Place Bet</div>
+                  {/* <div className="text-2xl mt-1">{format(potentialPayout)}</div> */}
+                </>
+              )}
             </button>
           </div>
-
-          {/* SUCCESS MESSAGE */}
-          {status === 'success' && (
-            <div className="mb-4 rounded-lg border border-emerald-500 bg-emerald-500/20 text-emerald-200 px-3 py-2 text-sm text-center animate-pulse">
-              ✅ Bet placed successfully!
-            </div>
-          )}
-
-          {/* ERROR MESSAGE */}
-          {status === 'error' && (
-            <div className="mb-4 rounded-lg border border-red-500 bg-red-500/20 text-red-200 px-3 py-2 text-sm text-center">
-              ❌ {errorMessage}
-            </div>
-          )}
-
-          {/* Amount */}
-          <div className="mb-4">
-            <label className="block text-xs font-medium text-purple-200/80 mb-2 tracking-[0.3em] uppercase">
-              Amount ({unit})
-            </label>
-            <input
-              type="number"
-              min="0"
-              max={maxDisplayAmount}
-              step="0.1"
-              value={Number.isFinite(displayAmount) ? displayAmount : 0}
-              onChange={handleAmountChange}
-              className="w-full rounded-2xl border border-white/20 bg-black/40 px-3 py-3 text-sm text-white outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-400/40"
-            />
-            <p className="mt-2 text-xs text-purple-200/70">
-              ≈ {formatWithUnit(amountSui, oppositeUnit)}
-            </p>
-          </div>
-
-          {/* Slider */}
-          <div className="mb-4">
-            <input
-              type="range"
-              min="0"
-              max={maxDisplayAmount}
-              step="0.001"
-              value={Number.isFinite(displayAmount) ? displayAmount : 0}
-              onChange={handleSliderChange}
-              className="w-full h-2 rounded-full cursor-pointer bg-purple-900/40 accent-fuchsia-400"
-            />
-            <div className="flex justify-between mt-1 text-xs text-purple-200/80">
-              <span>{formatWithUnit(0, unit)}</span>
-              <span>{formatWithUnit(maxBalance, unit)}</span>
-            </div>
-          </div>
-
-          {/* Quick buttons */}
-          <div className="grid grid-cols-4 gap-2 mb-4">
-            {[0.1, 0.25, 0.5, 1].map((p) => (
-              <button
-                key={p}
-                onClick={() => handleQuickAmount(maxBalance * p)}
-                className="rounded-2xl border border-white/15 bg-white/10 px-2 py-1.5 text-xs font-medium text-white transition hover:border-white/40"
-              >
-                {p === 1 ? 'Max' : `${p * 100}%`}
-              </button>
-            ))}
-          </div>
-
-          {/* Submit button */}
-          <button
-            onClick={handlePlaceBet}
-            disabled={amountSui > maxBalance || status === 'loading'}
-            className={`w-full rounded-3xl px-7 py-4 text-center font-bold text-white shadow-[0_20px_60px_rgba(114,57,181,0.7)] transition-all ${
-              option === 'yes'
-                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
-                : 'bg-gradient-to-r from-red-500 to-red-600'
-            }`}
-          >
-            {status === 'loading' ? (
-              'Processing...'
-            ) : (
-              <>
-                <div className="text-xs uppercase tracking-wider opacity-90">
-                  Get a chance to win
-                </div>
-                <div className="text-2xl mt-1">{format(potentialPayout)}</div>
-              </>
-            )}
-          </button>
         </div>
       </div>
     </>
