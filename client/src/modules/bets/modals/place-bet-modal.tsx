@@ -3,8 +3,9 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Transaction } from '@mysten/sui/transactions'
+import { MIST_PER_SUI } from '@mysten/sui/utils'
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit'
 
 type PlaceBetPopupProps = {
@@ -18,6 +19,7 @@ const PACKAGE_ID = '0x8fcc86d396abd6a468be3bcccfa9a02b0693319ae645389d561ec80124
 
 export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: PlaceBetPopupProps) {
   const [amount, setAmount] = useState(10)
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   // NEW STATES:
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
@@ -81,7 +83,29 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
 
   const handleQuickAmount = (v: number) => setAmount(v)
 
-  const potentialPayout = amount * 1.95
+  const parsePoolTotal = (value?: number | string) =>
+    Number(value ?? 0) / Number(MIST_PER_SUI)
+
+  const longPoolTotal = parsePoolTotal(bet.long_pool?.fields?.total)
+  const shortPoolTotal = parsePoolTotal(bet.short_pool?.fields?.total)
+  const totalPool = longPoolTotal + shortPoolTotal
+  const sidePool = option === 'yes' ? longPoolTotal : shortPoolTotal
+  const adjustedSidePool = sidePool + amount
+  const adjustedTotalPool = totalPool + amount
+  const ratio = adjustedSidePool > 0 ? amount / adjustedSidePool : 0
+  const potentialPayout = ratio > 0 ? adjustedTotalPool * ratio : amount
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!dialogRef.current) return
+      if (!dialogRef.current.contains(event.target as Node)) {
+        onClose()
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [onClose])
 
   return (
     <>
@@ -93,7 +117,10 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
 
       {/* Popup */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-md rounded-[28px] border border-white/10 bg-gradient-to-b from-[#1c0036] via-[#0b0116] to-[#06000d] p-6 text-white shadow-[0_25px_120px_rgba(8,0,15,0.8)]">
+        <div
+          ref={dialogRef}
+          className="pointer-events-auto w-full max-w-md rounded-[28px] border border-white/10 bg-gradient-to-b from-[#1c0036] via-[#0b0116] to-[#06000d] p-6 text-white shadow-[0_25px_120px_rgba(8,0,15,0.8)]"
+        >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col gap-1">
@@ -187,8 +214,12 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
               'Processing...'
             ) : (
               <>
-                <div className="text-xs uppercase tracking-wider opacity-90">Place Bet</div>
-                <div className="text-2xl mt-1">{potentialPayout.toFixed(2)} SUI</div>
+                <div className="text-xs uppercase tracking-wider opacity-90">
+                  Get a chance to win
+                </div>
+                <div className="text-2xl mt-1">
+                  {potentialPayout.toFixed(2)} SUI
+                </div>
               </>
             )}
           </button>
