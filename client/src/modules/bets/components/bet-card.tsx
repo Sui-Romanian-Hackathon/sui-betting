@@ -6,7 +6,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit'
 import { MIST_PER_SUI } from '@mysten/sui/utils'
-import PlaceBetPopup from './modals/place-bet'
+import PlaceBetPopup from '../modals/place-bet-modal'
 
 type BetComponentProps = BetProps & {
   isActive?: boolean
@@ -15,7 +15,13 @@ type BetComponentProps = BetProps & {
   onDeactivate?: () => void
 }
 
-export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate }: BetComponentProps) {
+export default function Bet({
+  bet,
+  isActive,
+  isHidden,
+  onActivate,
+  onDeactivate,
+}: BetComponentProps) {
   const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(null)
   const betObj: BetObj = bet
   const shortId = bet.id?.id ? `${bet.id.id.slice(0, 10)}...` : 'Loading'
@@ -36,7 +42,7 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
   const { data: balance } = useSuiClientQuery(
     'getBalance',
     { owner: account?.address || '' },
-    { enabled: !!account }
+    { enabled: !!account },
   )
 
   const maxBalance = balance?.totalBalance
@@ -65,20 +71,23 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
   return (
     <div className="relative w-full">
       <div className="group flex w-full items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-gradient-to-r from-[rgba(43,9,61,0.85)] via-[rgba(27,5,46,0.85)] to-[rgba(16,2,30,0.85)] px-7 py-6 text-white shadow-[0_20px_60px_rgba(8,0,15,0.75)] transition duration-300 hover:-translate-y-1 hover:border-purple-300/40">
-
         {/* LEFT SIDE = Clickable section */}
         <Link href={`/event/${bet.id.id}`} className="block flex-1">
           <div className="min-w-0">
             <h2 className="truncate text-lg font-semibold text-white drop-shadow">
               {betObj.description ?? 'Loading...'}
             </h2>
-            <p className="mt-2 text-[11px] uppercase tracking-[0.4em] text-purple-200/70">{shortId}</p>
+            <p className="mt-2 text-[11px] uppercase tracking-[0.4em] text-purple-200/70">
+              {shortId}
+            </p>
           </div>
         </Link>
 
         {/* RIGHT SIDE = Buttons */}
         {isSettled ? (
-          <span className={`rounded-full border px-4 py-1.5 text-xs font-semibold tracking-[0.3em] ${winnerBadgeClasses}`}>
+          <span
+            className={`rounded-full border px-4 py-1.5 text-xs font-semibold tracking-[0.3em] ${winnerBadgeClasses}`}
+          >
             Winner: {winningSide ?? 'Resolved'}
           </span>
         ) : isClosed ? (
@@ -110,7 +119,6 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
             </button>
           </div>
         )}
-
       </div>
 
       {/* Popup */}

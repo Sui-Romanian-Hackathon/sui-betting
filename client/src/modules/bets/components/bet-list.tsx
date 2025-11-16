@@ -3,11 +3,15 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import Bet from './bet'
-import { getBetList } from './helpers/get-bet-list'
+import Bet from './bet-card'
+import { getBetList } from '../api/get-bet-list'
 
 export default function BetList() {
-  const { data: bets, isLoading, error } = useQuery({
+  const {
+    data: bets,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['bet-list'],
     queryFn: getBetList,
   })
@@ -31,7 +35,7 @@ export default function BetList() {
   return (
     <section className="casino-scroll max-h-[520px] space-y-4 overflow-y-auto rounded-[28px] border border-white/10 bg-black/30 px-4 py-6 shadow-inner shadow-purple-950/60 sm:px-6">
       {bets.map((bet) => (
-        <Bet key={bet.id.id} bet={bet} />
+        <Bet key={(bet as BetObj).id!.id} bet={bet as BetObj} />
       ))}
     </section>
   )

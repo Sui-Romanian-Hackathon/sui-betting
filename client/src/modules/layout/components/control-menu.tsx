@@ -3,9 +3,9 @@
 'use client'
 
 import { useState } from 'react'
-import CreateBetModal from './modals/create-bet-modal'
-import SortModal from './modals/sort-modal'
-import FilterModal from './modals/filter-modal'
+import CreateBetModal from '../modals/create-bet-modal'
+import FilterModal from '../modals/filter-modal'
+import SortModal from '../modals/sort-modal'
 
 type OpenModal = 'create' | 'sort' | 'filter' | null
 
@@ -15,7 +15,11 @@ export default function Menu() {
   const close = () => setOpen(null)
 
   const buttons: { label: string; action: OpenModal; gradient: string }[] = [
-    { label: '+ Create Bet', action: 'create', gradient: 'from-fuchsia-500 via-purple-500 to-indigo-500' },
+    {
+      label: '+ Create Bet',
+      action: 'create',
+      gradient: 'from-fuchsia-500 via-purple-500 to-indigo-500',
+    },
     { label: 'Sort', action: 'sort', gradient: 'from-purple-500 to-purple-700' },
     { label: 'Filter', action: 'filter', gradient: 'from-indigo-500 to-blue-600' },
   ]

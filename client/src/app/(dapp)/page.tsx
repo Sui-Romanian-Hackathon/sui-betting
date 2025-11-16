@@ -1,11 +1,11 @@
 //client/src/app/(dapp)/page.tsx
 
-'use client';
+'use client'
 
-import WalletGate from "@/components/wallet-gate";
-import Wallet from "@/components/wallet";
-import Menu from "@/components/menu/menu";
-import BetList from "@/components/bet-list/bet-list";
+import BetList from '@/modules/bets/components/bet-list'
+import Menu from '@/modules/layout/components/control-menu'
+import WalletGate from '@/modules/wallet/components/wallet-gate'
+import Wallet from '@/modules/wallet/components/wallet-panel'
 
 export default function Home() {
   return (
@@ -31,18 +31,23 @@ export default function Home() {
                       Purple Palace Online Casino
                     </h1>
                     <p className="mt-3 max-w-xl text-base text-purple-100/80">
-                      Flashy odds, velvet gradients and instant wagers on-chain. Place bets with confidence in the most
-                      elegant Sui-powered experience.
+                      Flashy odds, velvet gradients and instant wagers on-chain. Place bets with
+                      confidence in the most elegant Sui-powered experience.
                     </p>
                   </div>
                   <div className="grid gap-4 text-sm text-white/90 sm:grid-cols-3">
                     {[
-                      { label: "Total Pools", value: "32 Active" },
-                      { label: "Jackpot Volume", value: "412,980 SUI" },
-                      { label: "Avg. Payout", value: "195%" },
+                      { label: 'Total Pools', value: '32 Active' },
+                      { label: 'Jackpot Volume', value: '412,980 SUI' },
+                      { label: 'Avg. Payout', value: '195%' },
                     ].map((stat) => (
-                      <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                        <p className="text-xs uppercase tracking-wide text-purple-200/80">{stat.label}</p>
+                      <div
+                        key={stat.label}
+                        className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+                      >
+                        <p className="text-xs uppercase tracking-wide text-purple-200/80">
+                          {stat.label}
+                        </p>
                         <p className="text-lg font-semibold text-white">{stat.value}</p>
                       </div>
                     ))}
@@ -57,7 +62,9 @@ export default function Home() {
               <div className="px-6 pb-10 pt-8 sm:px-8">
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-4 text-sm text-purple-100/80">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-purple-200/60">Live Tables</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-purple-200/60">
+                      Live Tables
+                    </p>
                     <p className="text-xl font-semibold text-white">Betting Gallery</p>
                   </div>
                   <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs">
@@ -72,5 +79,5 @@ export default function Home() {
         </div>
       </main>
     </div>
-  );
+  )
 }

@@ -1,11 +1,9 @@
-//client/src/components/wallet-gate.tsx
+'use client'
 
-'use client';
-
-import { useCurrentAccount, ConnectButton } from "@mysten/dapp-kit";
+import { useCurrentAccount, ConnectButton } from '@mysten/dapp-kit'
 
 export default function WalletGate({ children }: { children: React.ReactNode }) {
-  const account = useCurrentAccount();
+  const account = useCurrentAccount()
 
   if (!account) {
     return (
@@ -14,7 +12,8 @@ export default function WalletGate({ children }: { children: React.ReactNode }) 
           Step onto the velvet floor.
         </h2>
         <p className="max-w-2xl text-base text-purple-100/80">
-          Link your wallet to unlock live predictions, curated odds, glittering pools and instant on-chain payouts.
+          Link your wallet to unlock live predictions, curated odds, glittering pools and instant
+          on-chain payouts.
         </p>
         <ConnectButton
           style={{
@@ -29,8 +28,8 @@ export default function WalletGate({ children }: { children: React.ReactNode }) 
           }}
         />
       </div>
-    );
+    )
   }
 
-  return <>{children}</>;
+  return <>{children}</>
 }
