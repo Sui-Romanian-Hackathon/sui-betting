@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Transaction } from '@mysten/sui/transactions'
 import { MIST_PER_SUI } from '@mysten/sui/utils'
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit'
+import { useCurrency } from '@/modules/shared/currency'
 
 type PlaceBetPopupProps = {
   bet: BetObj
@@ -18,8 +19,9 @@ type PlaceBetPopupProps = {
 const PACKAGE_ID = '0x8fcc86d396abd6a468be3bcccfa9a02b0693319ae645389d561ec8012412fa71'
 
 export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: PlaceBetPopupProps) {
-  const [amount, setAmount] = useState(10)
+  const [amountSui, setAmountSui] = useState(10)
   const dialogRef = useRef<HTMLDivElement>(null)
+  const { unit, format, formatWithUnit, convertToUnit, convertFromUnit } = useCurrency()
 
   // NEW STATES:
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
@@ -41,7 +43,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
 
       const betSide = option === 'yes' ? 1 : 2
       const timestamp = Math.floor(Date.now() / 1000)
-      const mist = BigInt(Math.floor(amount * 1_000_000_000))
+      const mist = BigInt(Math.floor(amountSui * 1_000_000_000))
 
       // Build transaction
       const tx = new Transaction()
@@ -73,15 +75,21 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
   }
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(parseFloat(e.target.value))
+    const displayValue = parseFloat(e.target.value)
+    const valueInSui = convertFromUnit(displayValue, unit)
+    if (!Number.isFinite(valueInSui)) return
+    setAmountSui(Math.min(valueInSui, maxBalance))
   }
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = parseFloat(e.target.value) || 0
-    if (v <= maxBalance) setAmount(v)
+    const displayValue = parseFloat(e.target.value) || 0
+    const valueInSui = convertFromUnit(displayValue, unit)
+    if (valueInSui <= maxBalance) {
+      setAmountSui(valueInSui)
+    }
   }
 
-  const handleQuickAmount = (v: number) => setAmount(v)
+  const handleQuickAmount = (v: number) => setAmountSui(v)
 
   const parsePoolTotal = (value?: number | string) =>
     Number(value ?? 0) / Number(MIST_PER_SUI)
@@ -90,10 +98,14 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
   const shortPoolTotal = parsePoolTotal(bet.short_pool?.fields?.total)
   const totalPool = longPoolTotal + shortPoolTotal
   const sidePool = option === 'yes' ? longPoolTotal : shortPoolTotal
-  const adjustedSidePool = sidePool + amount
-  const adjustedTotalPool = totalPool + amount
-  const ratio = adjustedSidePool > 0 ? amount / adjustedSidePool : 0
-  const potentialPayout = ratio > 0 ? adjustedTotalPool * ratio : amount
+  const adjustedSidePool = sidePool + amountSui
+  const adjustedTotalPool = totalPool + amountSui
+  const ratio = adjustedSidePool > 0 ? amountSui / adjustedSidePool : 0
+  const potentialPayout = ratio > 0 ? adjustedTotalPool * ratio : amountSui
+
+  const displayAmount = convertToUnit(amountSui, unit)
+  const maxDisplayAmount = convertToUnit(maxBalance, unit)
+  const oppositeUnit = unit === 'SUI' ? 'USD' : 'SUI'
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -157,17 +169,20 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
           {/* Amount */}
           <div className="mb-4">
             <label className="block text-xs font-medium text-purple-200/80 mb-2 tracking-[0.3em] uppercase">
-              Amount (SUI)
+              Amount ({unit})
             </label>
             <input
               type="number"
               min="0"
-              max={maxBalance}
+              max={maxDisplayAmount}
               step="0.1"
-              value={amount}
+              value={Number.isFinite(displayAmount) ? displayAmount : 0}
               onChange={handleAmountChange}
               className="w-full rounded-2xl border border-white/20 bg-black/40 px-3 py-3 text-sm text-white outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-400/40"
             />
+            <p className="mt-2 text-xs text-purple-200/70">
+              ≈ {formatWithUnit(amountSui, oppositeUnit)}
+            </p>
           </div>
 
           {/* Slider */}
@@ -175,15 +190,15 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
             <input
               type="range"
               min="0"
-              max={maxBalance}
+              max={maxDisplayAmount}
               step="0.001"
-              value={amount}
+              value={Number.isFinite(displayAmount) ? displayAmount : 0}
               onChange={handleSliderChange}
               className="w-full h-2 rounded-full cursor-pointer bg-purple-900/40 accent-fuchsia-400"
             />
             <div className="flex justify-between mt-1 text-xs text-purple-200/80">
-              <span>0 SUI</span>
-              <span>{maxBalance.toFixed(2)} SUI</span>
+              <span>{formatWithUnit(0, unit)}</span>
+              <span>{formatWithUnit(maxBalance, unit)}</span>
             </div>
           </div>
 
@@ -203,7 +218,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
           {/* Submit button */}
           <button
             onClick={handlePlaceBet}
-            disabled={amount > maxBalance || status === 'loading'}
+            disabled={amountSui > maxBalance || status === 'loading'}
             className={`w-full rounded-3xl px-7 py-4 text-center font-bold text-white shadow-[0_20px_60px_rgba(114,57,181,0.7)] transition-all ${
               option === 'yes'
                 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
@@ -217,9 +232,7 @@ export default function PlaceBetPopup({ bet, option, maxBalance, onClose }: Plac
                 <div className="text-xs uppercase tracking-wider opacity-90">
                   Get a chance to win
                 </div>
-                <div className="text-2xl mt-1">
-                  {potentialPayout.toFixed(2)} SUI
-                </div>
+                <div className="text-2xl mt-1">{format(potentialPayout)}</div>
               </>
             )}
           </button>

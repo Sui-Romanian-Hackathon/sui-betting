@@ -4,6 +4,7 @@
 
 import BetList from '@/modules/bets/components/bet-list'
 import Menu from '@/modules/layout/components/control-menu'
+import CurrencySwitch from '@/modules/layout/components/currency-switch'
 import WalletGate from '@/modules/wallet/components/wallet-gate'
 import Wallet from '@/modules/wallet/components/wallet-panel'
 
@@ -55,6 +56,7 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-col items-center gap-4 rounded-3xl border border-white/10 bg-black/30 p-6 shadow-inner shadow-purple-900/30 lg:items-end">
+                  <CurrencySwitch className="self-stretch justify-center lg:self-end" />
                   <Wallet />
                   <Menu />
                 </div>
