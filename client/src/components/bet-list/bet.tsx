@@ -18,7 +18,17 @@ type BetComponentProps = BetProps & {
 export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate }: BetComponentProps) {
   const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(null)
   const betObj: BetObj = bet
-  const isClosed = Boolean(betObj.is_closed)
+  const isSettled = Boolean(betObj.is_settled)
+  const resultSideRaw = betObj.result_side
+  const resultSide = typeof resultSideRaw === 'string' ? Number(resultSideRaw) : resultSideRaw
+  const winningSide = resultSide === 1 ? 'YES' : resultSide === 2 ? 'NO' : null
+  const winnerBadgeClasses =
+    winningSide === 'YES'
+      ? 'border-emerald-500/50 bg-emerald-50 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300'
+      : winningSide === 'NO'
+        ? 'border-red-500/50 bg-red-50 text-red-700 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-300'
+        : 'border-zinc-200 bg-zinc-100 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+  const isClosed = Boolean(betObj.is_closed) || isSettled
 
   // Wallet balance
   const account = useCurrentAccount()
@@ -69,7 +79,11 @@ export default function Bet({ bet, isActive, isHidden, onActivate, onDeactivate 
         </Link>
 
         {/* RIGHT SIDE = Buttons */}
-        {isClosed ? (
+        {isSettled ? (
+          <span className={`rounded-lg border px-4 py-1.5 text-xs font-semibold ${winnerBadgeClasses}`}>
+            Winner: {winningSide ?? 'Resolved'}
+          </span>
+        ) : isClosed ? (
           <span className="rounded-lg border border-zinc-200 bg-zinc-100 px-4 py-1.5 text-xs font-medium text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
             Betting closed
           </span>
