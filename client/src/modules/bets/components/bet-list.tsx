@@ -23,7 +23,7 @@ export default function BetList({ onStats }: BetListProps) {
     refetchIntervalInBackground: true,
   })
 
-  const betArray = (bets ?? []) as BetObj[]
+  const betArray = ((bets ?? []) as BetObj[]).slice().reverse()
   const previousIdsRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
