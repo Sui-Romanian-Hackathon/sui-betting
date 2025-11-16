@@ -14,6 +14,7 @@ type BetObj = {
   result_side?: number | string
   long_pool?: { fields?: { total?: number | string } }
   short_pool?: { fields?: { total?: number | string } }
+  __isNew?: boolean
 }
 type BetRegistry = {
   events: string[]

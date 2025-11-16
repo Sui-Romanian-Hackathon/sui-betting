@@ -2,11 +2,16 @@
 
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Bet from './bet-card'
 import { getBetList } from '../api/get-bet-list'
 
-export default function BetList() {
+type BetListProps = {
+  onStats?: (stats: { total: number; open: number }) => void
+}
+
+export default function BetList({ onStats }: BetListProps) {
   const {
     data: bets,
     isLoading,
@@ -14,7 +19,38 @@ export default function BetList() {
   } = useQuery({
     queryKey: ['bet-list'],
     queryFn: getBetList,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
   })
+
+  const betArray = (bets ?? []) as BetObj[]
+  const previousIdsRef = useRef<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (!bets) {
+      return
+    }
+
+    const list = bets as BetObj[]
+    const totals = {
+      total: list.length,
+      open: list.filter((bet) => !bet.is_closed).length,
+    }
+    onStats?.(totals)
+
+    const currentIds = new Set<string>()
+    list.forEach((bet) => {
+      const id = bet.id.id
+      currentIds.add(id)
+      if (!previousIdsRef.current.has(id)) {
+        ;(bet as BetObj & { __isNew?: boolean }).__isNew = true
+        setTimeout(() => {
+          ;(bet as BetObj & { __isNew?: boolean }).__isNew = false
+        }, 6000)
+      }
+    })
+    previousIdsRef.current = currentIds
+  }, [bets, onStats])
 
   if (isLoading) {
     return (
@@ -34,8 +70,8 @@ export default function BetList() {
 
   return (
     <section className="casino-scroll max-h-[520px] space-y-4 overflow-y-auto rounded-[28px] border border-white/10 bg-black/30 px-4 py-6 shadow-inner shadow-purple-950/60 sm:px-6">
-      {bets.map((bet) => (
-        <Bet key={(bet as BetObj).id!.id} bet={bet as BetObj} />
+      {betArray.map((bet) => (
+        <Bet key={bet.id.id} bet={bet} />
       ))}
     </section>
   )

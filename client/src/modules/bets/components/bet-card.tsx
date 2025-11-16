@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit'
 import { MIST_PER_SUI } from '@mysten/sui/utils'
 import PlaceBetPopup from '../modals/place-bet-modal'
+import { useCurrency } from '@/modules/shared/currency'
 
 type BetComponentProps = BetProps & {
   isActive?: boolean
@@ -24,7 +25,11 @@ export default function Bet({
 }: BetComponentProps) {
   const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(null)
   const betObj: BetObj = bet
-  const shortId = bet.id?.id ? `${bet.id.id.slice(0, 10)}...` : 'Loading'
+  const { format } = useCurrency()
+  const parsePoolTotal = (value?: number | string) => Number(value ?? 0) / Number(MIST_PER_SUI)
+  const longPool = parsePoolTotal(betObj.long_pool?.fields?.total)
+  const shortPool = parsePoolTotal(betObj.short_pool?.fields?.total)
+  const totalPool = longPool + shortPool
   const isSettled = Boolean(betObj.is_settled)
   const resultSideRaw = betObj.result_side
   const resultSide = typeof resultSideRaw === 'string' ? Number(resultSideRaw) : resultSideRaw
@@ -70,15 +75,19 @@ export default function Bet({
 
   return (
     <div className="relative w-full">
-      <div className="group flex w-full items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-gradient-to-r from-[rgba(43,9,61,0.85)] via-[rgba(27,5,46,0.85)] to-[rgba(16,2,30,0.85)] px-7 py-6 text-white shadow-[0_20px_60px_rgba(8,0,15,0.75)] transition duration-300 hover:-translate-y-1 hover:border-purple-300/40">
+      <div
+        className={`group flex w-full items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-gradient-to-r from-[rgba(43,9,61,0.85)] via-[rgba(27,5,46,0.85)] to-[rgba(16,2,30,0.85)] px-7 py-6 text-white shadow-[0_20px_60px_rgba(8,0,15,0.75)] transition duration-300 hover:-translate-y-1 hover:border-purple-300/40 ${
+          betObj.__isNew ? 'ring-2 ring-emerald-400/60 shadow-[0_0_35px_rgba(16,185,129,0.5)] animate-[pulse_2s_ease-in-out_infinite]' : ''
+        }`}
+      >
         {/* LEFT SIDE = Clickable section */}
         <Link href={`/event/${bet.id.id}`} className="block flex-1">
           <div className="min-w-0">
             <h2 className="truncate text-lg font-semibold text-white drop-shadow">
               {betObj.description ?? 'Loading...'}
             </h2>
-            <p className="mt-2 text-[11px] uppercase tracking-[0.4em] text-purple-200/70">
-              {shortId}
+            <p className="mt-2 text-xs font-semibold text-purple-200/80">
+              Pool Size: {format(totalPool)}
             </p>
           </div>
         </Link>
