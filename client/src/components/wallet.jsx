@@ -6,14 +6,14 @@ import { useCurrentAccount, ConnectButton, useDisconnectWallet } from '@mysten/d
 
 export default function Wallet() {
   const account = useCurrentAccount();
-  const disconnect = useDisconnectWallet();
+  const { mutate: disconnect } = useDisconnectWallet();
 
   return (
     <div>
       {account ? (
         <button
           onClick={() => disconnect()}
-          className="rounded-xl bg-red-600 px-4 py-2 text-white"
+          className="rounded-xl bg-red-600 px-4 py-2 text-white hover:bg-red-700 transition"
         >
           Disconnect
         </button>
