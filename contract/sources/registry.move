@@ -1,32 +1,33 @@
+//contract/sources/registry.move
+
 #[allow(duplicate_alias)]
 module sui_betting::registry {
 
-    use sui::object::{ID, new};
+    use sui::object::{UID, new};
+    use sui::tx_context::TxContext;
+    use std::vector;
+    use sui::object;
     use sui::transfer;
 
-    /// Lista globală de PredictionEvent-uri
+    /// 🔥 Registry — ține lista tuturor PredictionEvent IDs
     public struct Registry has key, store {
         id: UID,
-        events: vector<ID>,
+        events: vector<object::ID>,
     }
 
-    /// Creează registry-ul global (o singură dată)
-    entry fun init_registry(ctx: &mut sui::tx_context::TxContext) {
-        let registry = Registry {
+    /// 🚀 Init — creează un registry nou, shared
+    entry fun init_registry(ctx: &mut TxContext) {
+        let reg = Registry {
             id: new(ctx),
-            events: vector::empty<ID>(),
+            events: vector::empty<object::ID>(),
         };
 
-        transfer::share_object(registry);
+        // Transformă obiectul în shared object
+        transfer::share_object(reg);
     }
 
-    /// Adaugă un eveniment nou
-    public fun add_event(registry: &mut Registry, event_id: ID) {
+    /// 🔥 Folosită de factory.create_event() pentru a adăuga un nou event
+    public fun add_event(registry: &mut Registry, event_id: object::ID) {
         vector::push_back(&mut registry.events, event_id);
-    }
-
-    /// Returnează lista ID-urilor
-    public fun get_events(registry: &Registry): &vector<ID> {
-        &registry.events
     }
 }

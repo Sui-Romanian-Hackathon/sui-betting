@@ -1,3 +1,5 @@
+//client/src/components/menu/modals/modal.tsx
+
 import React from 'react'
 
 type ModalProps = {

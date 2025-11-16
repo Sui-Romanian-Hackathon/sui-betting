@@ -1,3 +1,5 @@
+//contract/sources/event.move
+
 #[allow(lint(coin_field), unused_field)]
 module sui_betting::event {
 

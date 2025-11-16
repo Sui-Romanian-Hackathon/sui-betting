@@ -1,4 +1,6 @@
-import Modal from './modal'
+//client/src/components/menu/modals/filter-modal.tsx
+
+import Modal from './base-modal'
 
 type Props = {
   onClose: () => void

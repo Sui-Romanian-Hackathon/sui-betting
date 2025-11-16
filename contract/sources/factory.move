@@ -1,3 +1,5 @@
+//contract/sources/factory.move
+
 #[allow(duplicate_alias)]
 module sui_betting::factory {
 

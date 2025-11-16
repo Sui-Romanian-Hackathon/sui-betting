@@ -1,3 +1,5 @@
+//contract/sources/errors.move
+
 #[allow(unused_const)]
 module sui_betting::errors {
 

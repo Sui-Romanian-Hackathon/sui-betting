@@ -1,3 +1,5 @@
+//contract/sources/constants.move
+
 module sui_betting::constants {
 
     /// Reprezintă partea LONG (pariu că prețul va fi MAI MARE la final).

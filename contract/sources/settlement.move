@@ -1,3 +1,5 @@
+//contract/sources/settlement.move
+
 #[allow(duplicate_alias)]
 module sui_betting::settlement {
 
